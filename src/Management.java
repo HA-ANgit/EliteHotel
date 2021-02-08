@@ -60,9 +60,9 @@ public class Management {
                 ex.printStackTrace();
                 System.out.println("Connection error!");
             }
-            finally {
+            /*finally {
                 connection.close();
-            }
+            }*/
         }
     }
 

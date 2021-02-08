@@ -69,9 +69,6 @@ public class Reception {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-       finally {
-           connection.close();
-        }
     }
         
          private static void StoreCustomer() throws SQLException {
@@ -245,4 +242,4 @@ ResultSet result1 = sqlStatement.executeQuery("SELECT * FROM customer Where Cust
         System.out.println();
     } //Listar valt table från databasen
 
-    }
+}

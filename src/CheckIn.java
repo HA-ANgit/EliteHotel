@@ -3,12 +3,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class CheckIn {
 
     private static boolean exit = false;
-    private static Scanner input = new Scanner(System.in);
     private static final String url = "jdbc:mysql://localhost:3306/hotel?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private static final String user = "root";
     private static final String password = "Jonnydepp2121";
@@ -65,11 +63,11 @@ public class CheckIn {
 
             //Kan lägga till flera features på kunden som bokar rummet ex, telefonnummer
             System.out.println("Enter your first name: ");
-            String firstName = input.nextLine();
+            String firstName = Menu.lineInput();
             System.out.println("Enter your last name: ");
-            String lastName = input.nextLine();
+            String lastName = Menu.lineInput();
             System.out.println("Enter your phone number: ");
-            int phoneNum = Integer.parseInt(input.nextLine());
+            int phoneNum = Integer.parseInt(Menu.lineInput());
             System.out.println("Which room category would you like to book? ");
             System.out.println("1. Deluxe Double Room");
             System.out.println("2. Deluxe Single Room");
@@ -77,7 +75,7 @@ public class CheckIn {
             System.out.println("4. Standard Single Room");
             System.out.println("5. Suite");
             System.out.println("6. Exit");
-            int select = Integer.parseInt(input.nextLine());
+            int select = Integer.parseInt(Menu.lineInput());
 
             switch (select) {
                 //Deluxe Double Room
@@ -88,37 +86,18 @@ public class CheckIn {
                         do {
                             printRoomList(bookRoomDDR);
                             System.out.println("Enter room number for selected room: ");
-                            int selectedRoomDDR = Integer.parseInt(input.nextLine());
+                            int selectedRoom = Integer.parseInt(Menu.lineInput());
 
-                            String SQL = "SELECT roomNum FROM inhouseguest WHERE roomNum =" + selectedRoomDDR + "";
+                            String SQL = "SELECT roomNum FROM hotel.booked WHERE roomNum =" + selectedRoom + ";";
                             ResultSet rs = stmt.executeQuery(SQL);
                             if (rs.next()) {
                                 System.out.println("This room is occupied\n");
+                                System.out.println("Do you want to search for another room? (y/n)");
+                                answer = Menu.lineInput();
                             } else {
-                                System.out.println("This room is available\n");
-                                Menu.pressEnter();
-                                System.out.println("Enter room price: ");
-                                int roomPrice = Integer.parseInt(input.nextLine());
-                                sqlStatement.executeUpdate("INSERT INTO inhouseguest(roomNum, cost, firstName, lastName) VALUES('" + selectedRoomDDR + "', '" + roomPrice + "', '" + firstName + "','" + lastName + "')");
-                                sqlStatement.executeUpdate("INSERT INTO customer(phoneNum, firstName, lastName, lastUpdate) VALUES('" + phoneNum + "', '" + firstName + "', '" + lastName + "','"+datetime+"');");
-                                if (true) {
-                                    PreparedStatement state = connection.prepareStatement("UPDATE bookroom SET checkIn = ? WHERE roomNum = ?");
-                                    state.setDate(1, Date.valueOf(date));
-                                    state.setInt(2, selectedRoomDDR);
-                                    state.executeUpdate();
-                                    System.out.println("=========================================");
-                                    System.out.println("Room is booked under: " + firstName + " " + lastName);
-                                    System.out.println("Room category: Deluxe Double Room");
-                                    System.out.println("Room price: " + roomPrice + "SEK");
-                                    System.out.println("Room number: " + selectedRoomDDR);
-                                    System.out.println(Menu.ANSI_YELLOW + "PETIT HOTEL ELITE" + Menu.ANSI_RESET);
-                                    System.out.println("=========================================");
-                                    Management.connect();
+                                checkInMethod(4, selectedRoom, phoneNum, firstName, lastName);
                                 }
-                            }
-                            Menu.pressEnter();
-                            System.out.println("Do you want to search for another room? (y/n)");
-                            answer = input.nextLine();
+                            Management.connect();
                         } while (answer.equals("y"));
                     } catch (Exception e) {
                         System.out.println("ERROR: " + e.getMessage());
@@ -132,37 +111,18 @@ public class CheckIn {
                         do {
                             printRoomList(bookRoomDSR);
                             System.out.println("Enter room number for selected room: ");
-                            int selectedRoomDSR = Integer.parseInt(input.nextLine());
+                            int selectedRoom = Integer.parseInt(Menu.lineInput());
 
-                            String SQL = "SELECT roomNum FROM inhouseguest WHERE roomNum =" + selectedRoomDSR + "";
+                            String SQL = "SELECT roomNum FROM hotel.booked WHERE roomNum =" + selectedRoom + "";
                             ResultSet rs = stmt.executeQuery(SQL);
                             if (rs.next()) {
                                 System.out.println("This room is occupied\n");
+                                System.out.println("Do you want to search for another room? (y/n)");
+                                answer = Menu.lineInput();
                             } else {
-                                System.out.println("This room is available\n");
-                                Menu.pressEnter();
-                                System.out.println("Enter room price: ");
-                                int roomPrice = Integer.parseInt(input.nextLine());
-                                sqlStatement.executeUpdate("INSERT INTO inhouseguest(roomNum, cost, firstName, lastName) VALUES('" + selectedRoomDSR + "', '" + roomPrice + "', '" + firstName + "','" + lastName + "')");
-                                sqlStatement.executeUpdate("INSERT INTO customer(phoneNum, firstName, lastName, lastUpdate) VALUES('" + phoneNum + "', '" + firstName + "', '" + lastName + "','"+datetime+"');");
-                                if (true) {
-                                    PreparedStatement state = connection.prepareStatement("UPDATE bookroom SET checkIn = ? WHERE roomNum = ?");
-                                    state.setDate(1, Date.valueOf(date));
-                                    state.setInt(2, selectedRoomDSR);
-                                    state.executeUpdate();
-                                    System.out.println("=========================================");
-                                    System.out.println("Room is booked under: " + firstName + " " + lastName);
-                                    System.out.println("Room category: Deluxe Single Room");
-                                    System.out.println("Room price: " + roomPrice + "SEK");
-                                    System.out.println("Room number: " + selectedRoomDSR);
-                                    System.out.println(Menu.ANSI_YELLOW + "PETIT HOTEL ELITE" + Menu.ANSI_RESET);
-                                    System.out.println("=========================================");
-                                    Management.connect();
-                                }
+                                checkInMethod(2, selectedRoom, phoneNum, firstName, lastName);
                             }
-                            Menu.pressEnter();
-                            System.out.println("Do you want to search for another room? (y/n)");
-                            answer = input.nextLine();
+                            Management.connect();
                         } while (answer.equals("y"));
                     } catch (Exception e) {
                         System.out.println("ERROR: " + e.getMessage());
@@ -176,37 +136,18 @@ public class CheckIn {
                         do {
                             printRoomList(bookRoomSDR);
                             System.out.println("Enter room number for selected room: ");
-                            int selectedRoomSDR = Integer.parseInt(input.nextLine());
+                            int selectedRoom = Integer.parseInt(Menu.lineInput());
 
-                            String SQL = "SELECT roomNum FROM inhouseguest WHERE roomNum =" + selectedRoomSDR + "";
+                            String SQL = "SELECT roomNum FROM hotel.booked WHERE roomNum =" + selectedRoom + "";
                             ResultSet rs = stmt.executeQuery(SQL);
                             if (rs.next()) {
                                 System.out.println("This room is occupied\n");
+                                System.out.println("Do you want to search for another room? (y/n)");
+                                answer = Menu.lineInput();
                             } else {
-                                System.out.println("This room is available\n");
-                                Menu.pressEnter();
-                                System.out.println("Enter room price: ");
-                                int roomPrice = Integer.parseInt(input.nextLine());
-                                sqlStatement.executeUpdate("INSERT INTO inhouseguest(roomNum, cost, firstName, lastName) VALUES('" + selectedRoomSDR + "', '" + roomPrice + "', '" + firstName + "','" + lastName + "')");
-                                sqlStatement.executeUpdate("INSERT INTO customer(phoneNum, firstName, lastName, lastUpdate) VALUES('" + phoneNum + "', '" + firstName + "', '" + lastName + "','"+datetime+"');");
-                                if (true) {
-                                    PreparedStatement state = connection.prepareStatement("UPDATE bookroom SET checkIn = ? WHERE roomNum = ?");
-                                    state.setDate(1, Date.valueOf(date));
-                                    state.setInt(2, selectedRoomSDR);
-                                    state.executeUpdate();
-                                    System.out.println("=========================================");
-                                    System.out.println("Room is booked under: " + firstName + " " + lastName);
-                                    System.out.println("Room category: Standard Double Room");
-                                    System.out.println("Room price: " + roomPrice + "SEK");
-                                    System.out.println("Room number: " + selectedRoomSDR);
-                                    System.out.println(Menu.ANSI_YELLOW + "PETIT HOTEL ELITE" + Menu.ANSI_RESET);
-                                    System.out.println("=========================================");
-                                    Management.connect();
-                                }
+                                checkInMethod(3, selectedRoom, phoneNum, firstName, lastName);
                             }
-                            Menu.pressEnter();
-                            System.out.println("Do you want to search for another room? (y/n)");
-                            answer = input.nextLine();
+                            Management.connect();
                         } while (answer.equals("y"));
                     } catch (Exception e) {
                         System.out.println("ERROR: " + e.getMessage());
@@ -220,37 +161,18 @@ public class CheckIn {
                         do {
                             printRoomList(bookRoomSSR);
                             System.out.println("Enter room number for selected room: ");
-                            int selectedRoomSSR = Integer.parseInt(input.nextLine());
+                            int selectedRoom = Integer.parseInt(Menu.lineInput());
 
-                            String SQL = "SELECT roomNum FROM inhouseguest WHERE roomNum =" + selectedRoomSSR + "";
+                            String SQL = "SELECT roomNum FROM hotel.booked WHERE roomNum =" + selectedRoom + "";
                             ResultSet rs = stmt.executeQuery(SQL);
                             if (rs.next()) {
                                 System.out.println("This room is occupied\n");
+                                System.out.println("Do you want to search for another room? (y/n)");
+                                answer = Menu.lineInput();
                             } else {
-                                System.out.println("This room is available\n");
-                                Menu.pressEnter();
-                                System.out.println("Enter room price: ");
-                                int roomPrice = Integer.parseInt(input.nextLine());
-                                sqlStatement.executeUpdate("INSERT INTO inhouseguest(roomNum, cost, firstName, lastName) VALUES('" + selectedRoomSSR + "', '" + roomPrice + "', '" + firstName + "','" + lastName + "')");
-                                sqlStatement.executeUpdate("INSERT INTO customer(phoneNum, firstName, lastName, lastUpdate) VALUES('" + phoneNum + "', '" + firstName + "', '" + lastName + "','"+datetime+"');");
-                                if (true) {
-                                    PreparedStatement state = connection.prepareStatement("UPDATE bookroom SET checkIn = ? WHERE roomNum = ?");
-                                    state.setDate(1, Date.valueOf(date));
-                                    state.setInt(2, selectedRoomSSR);
-                                    state.executeUpdate();
-                                    System.out.println("=========================================");
-                                    System.out.println("Room is booked under: " + firstName + " " + lastName);
-                                    System.out.println("Room category: Standard Single Room");
-                                    System.out.println("Room price: " + roomPrice + "SEK");
-                                    System.out.println("Room number: " + selectedRoomSSR);
-                                    System.out.println(Menu.ANSI_YELLOW + "PETIT HOTEL ELITE" + Menu.ANSI_RESET);
-                                    System.out.println("=========================================");
-                                    Management.connect();
-                                }
+                                checkInMethod(1, selectedRoom, phoneNum, firstName, lastName);
                             }
-                            Menu.pressEnter();
-                            System.out.println("Do you want to search for another room? (y/n)");
-                            answer = input.nextLine();
+                            Management.connect();
                         } while (answer.equals("y"));
                     } catch (Exception e) {
                         System.out.println("ERROR: " + e.getMessage());
@@ -264,37 +186,16 @@ public class CheckIn {
                         do {
                             printRoomList(suite);
                             System.out.println("Enter room number for selected room: ");
-                            int selectedRoomSSR = Integer.parseInt(input.nextLine());
+                            int selectedRoom = Integer.parseInt(Menu.lineInput());
 
-                            String SQL = "SELECT roomNum FROM inhouseguest WHERE roomNum =" + selectedRoomSSR + "";
+                            String SQL = "SELECT roomNum FROM hotel.booked WHERE roomNum =" + selectedRoom + "";
                             ResultSet rs = stmt.executeQuery(SQL);
                             if (rs.next()) {
                                 System.out.println("This room is occupied\n");
                             } else {
-                                System.out.println("This room is available\n");
-                                Menu.pressEnter();
-                                System.out.println("Enter room price: ");
-                                int roomPrice = Integer.parseInt(input.nextLine());
-                                sqlStatement.executeUpdate("INSERT INTO inhouseguest(roomNum, cost, firstName, lastName) VALUES('" + selectedRoomSSR + "', '" + roomPrice + "', '" + firstName + "','" + lastName + "')");
-                                sqlStatement.executeUpdate("INSERT INTO customer(phoneNum, firstName, lastName, lastUpdate) VALUES('" + phoneNum + "', '" + firstName + "', '" + lastName + "','"+datetime+"');");
-                                if (true) {
-                                    PreparedStatement state = connection.prepareStatement("UPDATE bookroom SET checkIn = ? WHERE roomNum = ?");
-                                    state.setDate(1, Date.valueOf(date));
-                                    state.setInt(2, selectedRoomSSR);
-                                    state.executeUpdate();
-                                    System.out.println("=========================================");
-                                    System.out.println("Room is booked under: " + firstName + " " + lastName);
-                                    System.out.println("Room category: Suite");
-                                    System.out.println("Room price: " + roomPrice + "SEK");
-                                    System.out.println("Room number: " + selectedRoomSSR);
-                                    System.out.println(Menu.ANSI_YELLOW + "PETIT HOTEL ELITE" + Menu.ANSI_RESET);
-                                    System.out.println("=========================================");
-                                    Management.connect();
-                                }
+                                checkInMethod(5, selectedRoom, phoneNum, firstName, lastName);
                             }
-                            Menu.pressEnter();
-                            System.out.println("Do you want to search for another room? (y/n)");
-                            answer = input.nextLine();
+                            Management.connect();
                         } while (answer.equals("y"));
                     } catch (Exception e) {
                         System.out.println("ERROR: " + e.getMessage());
@@ -302,7 +203,7 @@ public class CheckIn {
                     break;
                 default:
                     System.out.println("Do you want to go back to the main menu? (y/n)");
-                    String answer1 = input.nextLine();
+                    String answer1 = Menu.lineInput();
                     if (answer1.equals("y")) {
                         Management.connect();
                     } else {
@@ -311,6 +212,34 @@ public class CheckIn {
             }
         } catch (Exception e) {
             System.out.println(e);
+        }
+    }
+
+    public static void checkInMethod(int roomCategory, int selectedRoom, int phoneNum, String firstName, String lastName) throws SQLException {
+
+        System.out.println("This room is available\n");
+        Menu.pressEnter();
+
+        ResultSet rs = sqlStatement.executeQuery("SELECT * FROM hotel.roomCategory WHERE categoryId = '" + roomCategory + "';");
+        rs.next();
+        String roomPrice = rs.getString("COST");
+        String roomType = rs.getString("roomType");
+
+        sqlStatement.executeUpdate("INSERT INTO customer(phoneNum, firstName, lastName, lastUpdate) VALUES('" + phoneNum + "','" + firstName + "','" + lastName + "', CURRENT_TIMESTAMP);");
+        rs = sqlStatement.executeQuery("SELECT MAX(customerId) FROM hotel.customer;");
+        rs.next();
+        String customerId = rs.getString("MAX(customerId)");
+        sqlStatement.executeUpdate("INSERT INTO bookRoom(roomNum, checkIn, lastUpdate, customerId) VALUES('" + selectedRoom + "', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, '" + customerId + "');");
+        sqlStatement.executeUpdate("UPDATE room SET available = '0' WHERE roomNum = '" + selectedRoom + "';");
+
+        if (sqlStatement.getUpdateCount() > 0) {
+            System.out.println("=========================================");
+            System.out.println("Room is booked under: " + firstName + " " + lastName);
+            System.out.println("Room category: "+ roomType);
+            System.out.println("Room price: " + roomPrice + "SEK");
+            System.out.println("Room number: " + selectedRoom);
+            System.out.println(Menu.ANSI_YELLOW + "PETIT HOTEL ELITE" + Menu.ANSI_RESET);
+            System.out.println("=========================================");
         }
     }
 
