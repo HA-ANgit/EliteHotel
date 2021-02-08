@@ -39,24 +39,40 @@ public class CheckIn {
             BookRoom r9 = new BookRoom(207, "Deluxe Double Room", 2980);
             BookRoom r10 = new BookRoom(208, "Standard Double Room", 2200);
             BookRoom r11 = new BookRoom(302, "The Suite", 5890);
+            BookRoom r12 = new BookRoom(102,"Standard Single Room",1440);
+            BookRoom r13 = new BookRoom(103 , "Standard Double Room",2200);
+            BookRoom r14 = new BookRoom(104,"Standard Double Room",2200);
+            BookRoom r15 = new BookRoom(105,"Deluxe Single Room",1820);
+            BookRoom r16 = new BookRoom(107,"Deluxe Single Room",1820);
+            BookRoom r17 = new BookRoom(202,"Standard Single Room",1440);
+            BookRoom r18 = new BookRoom(208,"Standard Double Room",2200);
+            BookRoom r19 = new BookRoom(301,"Deluxe Double Room",2980);
 
             // Deluxe Double Room
             bookRoomDDR.add(r2);
             bookRoomDDR.add(r3);
             bookRoomDDR.add(r7);
             bookRoomDDR.add(r9);
+            bookRoomDDR.add(r19);
 
             // Deluxe Single Room
             bookRoomDSR.add(r6);
             bookRoomDSR.add(r8);
+            bookRoomDSR.add(r15);
+            bookRoomDSR.add(r16);
 
             // Standard Double Room
             bookRoomSDR.add(r5);
             bookRoomSDR.add(r10);
+            bookRoomSDR.add(r13);
+            bookRoomSDR.add(r18);
 
             // Standard Single Room
             bookRoomSSR.add(r1);
             bookRoomSSR.add(r4);
+            bookRoomSSR.add(r12);
+            bookRoomSSR.add(r14);
+            bookRoomSSR.add(r17);
 
             // Suite
             suite.add(r11);

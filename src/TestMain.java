@@ -14,9 +14,9 @@ public class TestMain {
         while (!exit) {
 
             Menu.blob();
-            System.out.println(Menu.ANSI_YELLOW + "Select Service: " + Menu.ANSI_RESET + "\n1. Customer View\n" +
-                    "2. Management View\n" +
-                    "3. Exit");
+            System.out.println(Menu.ANSI_YELLOW + "Select Service: \n[1]" + Menu.ANSI_RESET + " Receptionist View\n" +
+                    Menu.ANSI_YELLOW + "[2]" + Menu.ANSI_RESET + " Customer View\n" +
+                    Menu.ANSI_YELLOW + "[3]" + Menu.ANSI_RESET +" Exit");
 
             int selection = Menu.intInput();
 

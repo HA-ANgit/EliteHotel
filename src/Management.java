@@ -4,7 +4,7 @@ import java.io.SequenceInputStream;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Scanner;
+import java.time.temporal.ChronoUnit;
 import java.util.function.BiFunction;
 import java.sql.SQLException;
 
@@ -73,26 +73,26 @@ public class Management {
         int columnCount = result.getMetaData().getColumnCount();            // hämtar antalet kolumner för att sedan namnge dessa i en array
         String[] columnNames = new String[columnCount];
         for (int i = 0; i < columnCount; i++) {
-            columnNames[i] = result.getMetaData().getColumnName(i + 1);
-        }
-
-        for (String columnName : columnNames) {         // lägg kolumnnamn i string array, skriver ut dessa med pad right-metoden
-            System.out.print(Menu.ANSI_YELLOW + PadRight(columnName) + Menu.ANSI_RESET);
-        }
-
-        while (result.next()) {
-            System.out.println();
-            for (String columnName : columnNames) {             // hämtar data för resp kolumner för samtliga rader
-                String value = result.getString(columnName);
-
-                if (value == null)
-                    value = "null";
-                System.out.print(PadRight(value));
+                columnNames[i] = result.getMetaData().getColumnName(i + 1);
             }
-        }
-        if (columnCount == 0) {
-            System.out.println("\nNo result!");
-        } else {
+
+            for (String columnName : columnNames) {         // lägg kolumnnamn i string array, skriver ut dessa med pad right-metoden
+                System.out.print(Menu.ANSI_YELLOW + PadRight(columnName) + Menu.ANSI_RESET);
+            }
+
+            while (result.next()) {
+                System.out.println();
+                for (String columnName : columnNames) {             // hämtar data för resp kolumner för samtliga rader
+                    String value = result.getString(columnName);
+
+                    if (value == null)
+                        value = "null";
+                    System.out.print(PadRight(value));
+                }
+            }
+            if (columnCount == 0) {
+                System.out.println("\nNo result!");
+            } else {
         }
         System.out.println();
     } //Listar valt table från databasen
@@ -101,75 +101,11 @@ public class Management {
         System.out.println("Enter guest room number: ");
         int roomNumber = Integer.parseInt(Menu.lineInput());
 
-        PreparedStatement statement = connection.prepareStatement("SELECT 'roomNum', 'firstName', 'lastName', 'cost' UNION ALL SELECT * FROM hms.inhouseguest WHERE roomNum = "+roomNumber+
-                "     INTO OUTFILE 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/accommodation"+roomNumber+".txt'"+
+        checkOutMethod(roomNumber);
+
+        PreparedStatement statement = connection.prepareStatement("SELECT * FROM hotel.booked WHERE roomNum = " + roomNumber  + "      INTO OUTFILE 'accommodation"+roomNumber+".txt'"+
                 "     FIELDS TERMINATED BY ','");
         statement.executeQuery();
-
-        try {
-            //lägg till sökvägen för att hitta file1
-            FileInputStream file1 = new FileInputStream("C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/accommodation" + roomNumber + ".txt");
-            FileInputStream file2 = new FileInputStream("roomservice" + roomNumber + ".txt");
-            //skriver ut båda streams samtidigt
-            SequenceInputStream input = new SequenceInputStream(file1, file2);
-            int j;
-            while ((j = input.read()) != -1) {
-                System.out.print((char) j);
-            }
-            input.close();
-            file1.close();
-            file2.close();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        //Fyller i kostnaderna från respektive kvitto som skrivits ut
-        System.out.println("\nEnter total accommodation cost: ");
-        int roomBill = Integer.parseInt(Menu.lineInput());
-
-        System.out.println("Enter room service cost: ");
-        int foodBill = Integer.parseInt(Menu.lineInput());
-
-        //binary function tar in två argument, i detta fall kvittokostnaderna och genom method reference klassen,
-        //adderar den båda summorna
-        BiFunction<Integer, Integer, Integer> adder = MethodReference::add;
-        int result = adder
-                .apply(roomBill, foodBill);
-
-        //sparar det nya kvittot med den sammanlagda summan
-        try {
-            FileOutputStream file = new FileOutputStream("totalhotelcost" + roomNumber + ".txt");
-            String s = ("==================================\n" +
-                    "Total cost: " + result + "SEK" +
-                    "\nThank you for staying with us!" +
-                    "\nBest regards,\n"+ Menu.ANSI_YELLOW +"PETIT HOTEL ELITE"+ Menu.ANSI_RESET +
-                    "\n==================================");
-            byte b[] = s.getBytes();
-            file.write(b);
-            file.close();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        System.out.println("==================================");
-        System.out.println("Guest is checked out from room: " + roomNumber);
-        System.out.println("Checkout date: " + LocalDate.now());
-
-        sqlStatement.executeUpdate("DELETE FROM inhouseguest WHERE roomNum =" + roomNumber + ";");
-        PreparedStatement state = connection.prepareStatement("UPDATE bookroom SET checkOut = ? WHERE roomNum = ?");
-        state.setDate(1, Date.valueOf(date));
-        state.setInt(2, roomNumber);
-        state.executeUpdate();
-
-        //skriver ut det nya kvittot med den sammanlagda summan
-        try {
-            FileInputStream file = new FileInputStream("totalhotelcost" + roomNumber + ".txt");
-            int i = 0;
-            while ((i = file.read()) != -1) {
-                System.out.print((char) i);
-            }
-            file.close();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
     }
 
     private static String PadRight(String string) {
@@ -186,6 +122,102 @@ public class Management {
         }
 
         return stringBuilder.toString();
+    }
+
+    public static void checkOutMethod(int roomNumber) throws SQLException {
+        boolean exit = false;
+        System.out.println("Check out room " + Menu.ANSI_RED + roomNumber + Menu.ANSI_RESET + "?\n");
+        System.out.println("Do you want to continue? (y/n)");
+        String answer = Menu.lineInput();
+
+        if (answer.equals("y")) {
+            ResultSet rs = sqlStatement.executeQuery("SELECT * FROM hotel.booked WHERE roomNum = '" + roomNumber  + "';"); //Roomnumber skickas in via kallandet på metoden.
+            rs.next();
+            String firstName = rs.getString("firstName");
+            String lastName = rs.getString("lastName");
+            String roomType = rs.getString("roomType");
+            int roomPrice = Integer.parseInt(rs.getString("cost"));
+            String bookingId = rs.getString("bookingId");
+            Date checkIn = rs.getDate("checkIn");
+            LocalDate checkOut = LocalDate.now();
+            long daysLeft = 0;
+            daysLeft = checkOut.until(checkIn.toLocalDate(), ChronoUnit.DAYS);
+            //java.sql.Date.valueOf( localDate );
+
+            sqlStatement.executeUpdate("UPDATE hotel.bookRoom SET checkOut = CURRENT_TIMESTAMP WHERE bookingId = '" + bookingId + "';");
+            sqlStatement.executeUpdate("UPDATE room SET available = '1' WHERE roomNum = '" + roomNumber + "';");
+
+            if (sqlStatement.getUpdateCount() > 0) {
+                System.out.println("=========================================");
+                System.out.println("Room Checked Out: " + firstName + " " + lastName);
+                System.out.println("Room category: "+ roomType);
+                System.out.println("Room price: " + (roomPrice * daysLeft) + "SEK");
+                System.out.println("Room number: " + roomNumber);
+                System.out.println(Menu.ANSI_YELLOW + "PETIT HOTEL ELITE" + Menu.ANSI_RESET);
+                System.out.println("=========================================");
+
+                try {
+                    //lägg till sökvägen för att hitta file1
+                    FileInputStream file1 = new FileInputStream("accommodation" + roomNumber + ".txt");
+
+                    FileInputStream file2 = new FileInputStream("roomservice" + roomNumber + ".txt");
+                    //skriver ut båda streams samtidigt
+                    SequenceInputStream input = new SequenceInputStream(file1, file2);
+                    int j;
+                    while ((j = input.read()) != -1) {
+                        System.out.print((char) j);
+                    }
+                    input.close();
+                    file1.close();
+                    file2.close();
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+                //Fyller i kostnaderna från respektive kvitto som skrivits ut
+                System.out.println("\nEnter total accommodation cost: ");
+                int roomBill = Integer.parseInt(Menu.lineInput());
+
+                System.out.println("Enter room service cost: ");
+                int foodBill = Integer.parseInt(Menu.lineInput());
+
+                //binary function tar in två argument, i detta fall kvittokostnaderna och genom method reference klassen,
+                //adderar den båda summorna
+                BiFunction<Integer, Integer, Integer> adder = MethodReference::add;
+                int result = adder
+                        .apply(roomBill, foodBill);
+
+                //sparar det nya kvittot med den sammanlagda summan
+                try {
+                    FileOutputStream file = new FileOutputStream("totalhotelcost" + roomNumber + ".txt");
+                    String s = ("==================================\n" +
+                            "Total cost: " + result + "SEK" +
+                            "\nThank you for staying with us!" +
+                            "\nBest regards,\n"+ Menu.ANSI_YELLOW +"PETIT HOTEL ELITE"+ Menu.ANSI_RESET +
+                            "\n==================================");
+                    byte b[] = s.getBytes();
+                    file.write(b);
+                    file.close();
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+
+                //skriver ut det nya kvittot med den sammanlagda summan
+                try {
+                    FileInputStream file = new FileInputStream("totalhotelcost" + roomNumber + ".txt");
+                    int i = 0;
+                    while ((i = file.read()) != -1) {
+                        System.out.print((char) i);
+                    }
+                    file.close();
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+
+
+            }
+        } else {
+            exit = true;
+        }
     }
 
 }
