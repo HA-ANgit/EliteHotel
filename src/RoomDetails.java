@@ -54,13 +54,14 @@ public class RoomDetails {
                     // stream all roomdetails with foreach
                     rooms.forEach(System.out::println);
                 default:
-                    System.out.println("Do you want to continue? (y/n)");
-                    String answer = Menu.lineInput();
-                    if (answer.equals("y")) {
+                    exit = true;
+                    //System.out.println("Do you want to continue? (y/n)");
+                   // String answer = Menu.lineInput();
+                   /* if (answer.equals("y")) {
                         //startMethod();
                     } else {
                         exit = true;
-                    }
+                    }*/
             }
 
         }

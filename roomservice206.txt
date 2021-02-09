@@ -1,4 +1,4 @@
 ==================================
-Total room service cost: 440SEK
-Room number: 2
+Total room service cost: 600SEK
+Room number: 206
 ==================================
