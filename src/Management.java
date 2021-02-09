@@ -103,9 +103,9 @@ public class Management {
 
         checkOutMethod(roomNumber);
 
-        PreparedStatement statement = connection.prepareStatement("SELECT * FROM hotel.booked WHERE roomNum = " + roomNumber  + "      INTO OUTFILE 'accommodation"+roomNumber+".txt'"+
+        /*PreparedStatement statement = connection.prepareStatement("SELECT * FROM hotel.booked WHERE roomNum = " + roomNumber  + "      INTO OUTFILE 'accommodation"+roomNumber+".txt'"+
                 "     FIELDS TERMINATED BY ','");
-        statement.executeQuery();
+        statement.executeQuery();*/
     }
 
     private static String PadRight(String string) {
@@ -142,6 +142,7 @@ public class Management {
             LocalDate checkOut = LocalDate.now();
             long daysLeft = 0;
             daysLeft = checkOut.until(checkIn.toLocalDate(), ChronoUnit.DAYS);
+            long totalCost = (roomPrice * daysLeft);
             //java.sql.Date.valueOf( localDate );
 
             sqlStatement.executeUpdate("UPDATE hotel.bookRoom SET checkOut = CURRENT_TIMESTAMP WHERE bookingId = '" + bookingId + "';");
@@ -151,7 +152,7 @@ public class Management {
                 System.out.println("=========================================");
                 System.out.println("Room Checked Out: " + firstName + " " + lastName);
                 System.out.println("Room category: "+ roomType);
-                System.out.println("Room price: " + (roomPrice * daysLeft) + "SEK");
+                System.out.println("Room price: " + totalCost + " SEK");
                 System.out.println("Room number: " + roomNumber);
                 System.out.println(Menu.ANSI_YELLOW + "PETIT HOTEL ELITE" + Menu.ANSI_RESET);
                 System.out.println("=========================================");
@@ -174,26 +175,28 @@ public class Management {
                     System.out.println(e);
                 }
                 //Fyller i kostnaderna från respektive kvitto som skrivits ut
-                System.out.println("\nEnter total accommodation cost: ");
-                int roomBill = Integer.parseInt(Menu.lineInput());
+               //System.out.println("\nEnter total accommodation cost: ");
+                //int roomBill = Integer.parseInt(Menu.lineInput());
 
-                System.out.println("Enter room service cost: ");
+                System.out.println("Enter total room service cost: ");
                 int foodBill = Integer.parseInt(Menu.lineInput());
 
                 //binary function tar in två argument, i detta fall kvittokostnaderna och genom method reference klassen,
                 //adderar den båda summorna
                 BiFunction<Integer, Integer, Integer> adder = MethodReference::add;
                 int result = adder
-                        .apply(roomBill, foodBill);
+                        .apply((int) totalCost, foodBill);
 
                 //sparar det nya kvittot med den sammanlagda summan
                 try {
-                    FileOutputStream file = new FileOutputStream("totalhotelcost" + roomNumber + ".txt");
-                    String s = ("==================================\n" +
-                            "Total cost: " + result + "SEK" +
-                            "\nThank you for staying with us!" +
-                            "\nBest regards,\n"+ Menu.ANSI_YELLOW +"PETIT HOTEL ELITE"+ Menu.ANSI_RESET +
-                            "\n==================================");
+                    FileOutputStream file = new FileOutputStream("accommodation" + roomNumber + ".txt");
+                    String s = ("=========================================" +
+                            "\nRoom Checked Out: " + firstName + " " + lastName+
+                            "\nRoom category: "+ roomType+
+                            "\nRoom price: " + totalCost + "SEK"+
+                            "\nRoom number: " + roomNumber+
+                            "\nPETIT HOTEL ELITE\n"+
+                            "=========================================");
                     byte b[] = s.getBytes();
                     file.write(b);
                     file.close();
